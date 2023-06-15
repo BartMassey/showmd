@@ -26,14 +26,16 @@
 # optional pandoc dependencies you may need.
 
 MATHJAX='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-MML-AM_CHTML'
-PANDOC_MARKDOWN="pandoc --to html --standalone --mathjax=$MATHJAX --template=$HOME/etc/pandoc/default.html5"
-MARKDOWN="$PANDOC_MARKDOWN --from markdown"
+PANDOC_MARKDOWN_BASE="pandoc --to html --mathjax=$MATHJAX"
+PANDOC_MARKDOWN_STANDALONE="$PANDOC_MARKDOWN_BASE --standalone"
+PANDOC_MARKDOWN_FRAGMENT="$PANDOC_MARKDOWN_BASE"
+# MARKDOWN="$PANDOC_MARKDOWN_FRAGMENT --from markdown"
+MARKDOWN="$PANDOC_MARKDOWN_FRAGMENT --from gfm"
 
 USAGE="showmd [--format] [--<formatter>] <markdown-file>"
-FORMATTERS="formatters: pandoc markdown multi pmulti github"
+FORMATTERS="formatters: pandoc markdown multi pinline pmulti github"
 
 JUST_FORMAT=false
-PANDOC_TITLE=true
 while [ $# -gt 1 ]
 do
     case "$1" in
@@ -42,29 +44,37 @@ do
             shift
             ;;
         --pandoc)
-            MARKDOWN="$PANDOC_MARKDOWN --from markdown"
+            MARKDOWN="$PANDOC_MARKDOWN_FRAGMENT --from markdown"
             shift
             break
             ;;
         --markdown)
             MARKDOWN=markdown
-            PANDOC_TITLE=false
             shift
             break
             ;;
         --multi)
             MARKDOWN=multimarkdown
-            PANDOC_TITLE=false
+            shift
+            break
+            ;;
+        --pinline)
+            MARKDOWN="$PANDOC_MARKDOWN_FRAGMENT"
             shift
             break
             ;;
         --pmulti)
-            MARKDOWN="$PANDOC_MARKDOWN --from markdown_mmd"
+            MARKDOWN="$PANDOC_MARKDOWN_FRAGMENT --from markdown_mmd"
             shift
             break
             ;;
         --github)
-            MARKDOWN="$PANDOC_MARKDOWN --from gfm"
+            MARKDOWN="$PANDOC_MARKDOWN_FRAGMENT --from gfm"
+            shift
+            break
+            ;;
+        --gitlab)
+            MARKDOWN="gitlab-markup"
             shift
             break
             ;;
@@ -86,18 +96,12 @@ case $# in
         ;;
 esac
 
-if $PANDOC_TITLE
-then
-    # Omit the title header when displaying the HTML, and
-    # get a "decent" tab title. Pandoc *really* wants to
-    # mess with your document.
-    MARKDOWN="$MARKDOWN --metadata title=showmd:$DOC --css=h1.title{display:false;}"
-fi
-
+TMP1=/tmp/showmd-$$.md
 TMP=/tmp/showmd-$$.html
 # I remove ASCII formfeeds from the document before
 # processing, because reasons.
-sed 's===' "$DOC" | $MARKDOWN >$TMP &&
+sed 's===' "$DOC" >$TMP1
+$MARKDOWN $TMP1 >$TMP &&
 if $JUST_FORMAT
 then
     cat $TMP
@@ -113,7 +117,7 @@ else
     # opening the file. I don't know why. I've suppressed
     # these in the obvious way, which is kind of dangerous
     # if something actually fails. But it normally never does.
-    xdg-open "$TMP" 2>/dev/null
+    xdg-open $TMP 2>/dev/null
     if [ $? -ne 0 ]
     then
         echo "showmd: xdg-open failed" >&2
@@ -122,4 +126,4 @@ else
         sleep 2
     fi
 fi
-rm -f "$TMP"
+rm -f $TMP1 $TMP

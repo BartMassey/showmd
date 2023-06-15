@@ -74,6 +74,13 @@ where *formatter* is one of the following:
 
 * `github`: Github Markdown using the `pandoc` formatter.
 
+* `gitlab`: Gitlab Markdown using the `gitlab-markup` formatter.
+
+  Using this requires Ruby `gem gitlab-markup`, which
+  currently requires manually doing `gem markdown`, which is
+  unfortunate. This version also seems buggy relative to
+  what's on GitLab, mis-rendering some HTML entities.
+
 ## Issues
 
 (See also the project Issue tracker.)
