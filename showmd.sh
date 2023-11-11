@@ -26,21 +26,27 @@
 # optional pandoc dependencies you may need.
 
 MATHJAX='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-MML-AM_CHTML'
-PANDOC_MARKDOWN_BASE="pandoc --to html --mathjax=$MATHJAX"
+PANDOC_MARKDOWN_BASE="pandoc --to html --ascii --mathjax=$MATHJAX"
 PANDOC_MARKDOWN_STANDALONE="$PANDOC_MARKDOWN_BASE --standalone"
 PANDOC_MARKDOWN_FRAGMENT="$PANDOC_MARKDOWN_BASE"
 # MARKDOWN="$PANDOC_MARKDOWN_FRAGMENT --from markdown"
 MARKDOWN="$PANDOC_MARKDOWN_FRAGMENT --from gfm"
 
-USAGE="showmd [--format] [--<formatter>] <markdown-file>"
+USAGE="showmd [--format] [--clip] [--<formatter>] <markdown-file>"
 FORMATTERS="formatters: pandoc markdown multi pinline pmulti github"
 
 JUST_FORMAT=false
+CLIP=false
 while [ $# -gt 1 ]
 do
     case "$1" in
         --format)
             JUST_FORMAT=true
+            shift
+            ;;
+        --clip)
+            JUST_FORMAT=true
+            CLIP=true
             shift
             ;;
         --pandoc)
@@ -104,7 +110,12 @@ sed 's===' "$DOC" >$TMP1
 $MARKDOWN $TMP1 >$TMP &&
 if $JUST_FORMAT
 then
-    cat $TMP
+    if $CLIP
+    then
+        xclip -selection clipboard -in <$TMP
+    else
+        cat $TMP
+    fi
 else
     # On some browsers, xdg-open is buggy in that it doesn't
     # ensure that the browser has rendered the file before
