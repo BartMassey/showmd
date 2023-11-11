@@ -51,30 +51,35 @@ executable: you should then be good to go.
 
 Run with
 
-    showmd [--format] [--<formatter>] <markdown-file>
+    showmd [args] <markdown-file>
 
-where *formatter* is one of the following:
+The order of the arguments is crucial: `--format` or
+`--clip` should come first, then `--mathjax` or `--mathml`,
+then `--standalone`, and finally `--formatter` for one of
+the formatters. (This is not ideal, but works for now.)
 
-* `pandoc`: Pandoc Classic Markdown
+The default formatter is `--github`. The available formatters are
 
-* `markdown`: Classic Markdown using the Classic Markdown
+* `--pandoc`: Pandoc Classic Markdown
+
+* `--markdown`: Classic Markdown using the Classic Markdown
   formatter.
 
   The Classic Markdown formatter doesn't handle UTF-8
   properly.  It also doesn't handle LaTeX math at all.
 
-* `multi`: Classic MultiMarkdown using the Classic MultiMarkdown
+* `--multi`: Classic MultiMarkdown using the Classic MultiMarkdown
   formatter.
 
   The Classic Markdown formatter doesn't handle LaTeX math
   at all. I haven't checked whether it handles UTF-8
   properly: I doubt it.
 
-* `pmulti`: MultiMarkdown using the `pandoc` formatter.
+* `--pmulti`: MultiMarkdown using the `pandoc` formatter.
 
-* `github`: Github Markdown using the `pandoc` formatter.
+* `--github`: Github Markdown using the `pandoc` formatter.
 
-* `gitlab`: Gitlab Markdown using the `gitlab-markup` formatter.
+* `--gitlab`: Gitlab Markdown using the `gitlab-markup` formatter.
 
   Using this requires Ruby `gem gitlab-markup`, which
   currently requires manually doing `gem markdown`, which is

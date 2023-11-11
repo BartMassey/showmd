@@ -26,13 +26,12 @@
 # optional pandoc dependencies you may need.
 
 MATHJAX='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-MML-AM_CHTML'
-PANDOC_MARKDOWN_BASE="pandoc --to html --ascii --mathjax=$MATHJAX"
+PANDOC_MARKDOWN_BASE="pandoc --to html --ascii"
 PANDOC_MARKDOWN_STANDALONE="$PANDOC_MARKDOWN_BASE --standalone"
 PANDOC_MARKDOWN_FRAGMENT="$PANDOC_MARKDOWN_BASE"
-# MARKDOWN="$PANDOC_MARKDOWN_FRAGMENT --from markdown"
-MARKDOWN="$PANDOC_MARKDOWN_FRAGMENT --from gfm"
+MARKDOWN=""
 
-USAGE="showmd [--format] [--clip] [--<formatter>] <markdown-file>"
+USAGE="showmd [--format|--clip] [--standalone] [--mathjax|--mathml] [--<formatter>] <markdown-file>"
 FORMATTERS="formatters: pandoc markdown multi pinline pmulti github"
 
 JUST_FORMAT=false
@@ -47,6 +46,19 @@ do
         --clip)
             JUST_FORMAT=true
             CLIP=true
+            shift
+            ;;
+        --standalone)
+            PANDOC_MARKDOWN_FRAGMENT="$PANDOC_MARKDOWN_STANDALONE"
+            MARKDOWN="$PANDOC_MARKDOWN_FRAGMENT --from gfm"
+            shift
+            ;;
+        --mathjax)
+            PANDOC_MARKDOWN_FRAGMENT="$PANDOC_MARKDOWN_FRAGMENT --mathjax=$MATHJAX"
+            shift
+            ;;
+        --mathml)
+            PANDOC_MARKDOWN_FRAGMENT="$PANDOC_MARKDOWN_FRAGMENT --mathml"
             shift
             ;;
         --pandoc)
@@ -101,6 +113,11 @@ case $# in
         exit 1
         ;;
 esac
+
+if [ "$MARKDOWN" = "" ]
+then
+   MARKDOWN="$PANDOC_MARKDOWN_FRAGMENT --from gfm"
+fi
 
 TMP1=/tmp/showmd-$$.md
 TMP=/tmp/showmd-$$.html
