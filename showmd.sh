@@ -26,16 +26,17 @@
 # optional pandoc dependencies you may need.
 
 MATHJAX='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-MML-AM_CHTML'
-PANDOC_MARKDOWN_BASE="pandoc --to html --ascii"
+PANDOC_MARKDOWN_BASE="pandoc --mathml --to html --ascii"
 PANDOC_MARKDOWN_STANDALONE="$PANDOC_MARKDOWN_BASE --standalone"
 PANDOC_MARKDOWN_FRAGMENT="$PANDOC_MARKDOWN_BASE"
 MARKDOWN=""
 
 USAGE="showmd [--format|--clip] [--standalone] [--mathjax|--mathml] [--<formatter>] <markdown-file>"
-FORMATTERS="formatters: pandoc markdown multi pinline pmulti github"
+FORMATTERS="formatters: pandoc markdown multi pinline pmulti github github-pandoc gitlab"
 
 JUST_FORMAT=false
 CLIP=false
+FAIL=false
 while [ $# -gt 1 ]
 do
     case "$1" in
@@ -87,6 +88,12 @@ do
             break
             ;;
         --github)
+            EMPTY=""
+            MARKDOWN="XXXGITHUBSPECIALXXX"
+            shift
+            break
+            ;;
+        --github-pandoc)
             MARKDOWN="$PANDOC_MARKDOWN_FRAGMENT --from gfm"
             shift
             break
@@ -103,6 +110,10 @@ do
             ;;
     esac
 done
+if [ $? -ne 0 ]
+then
+   exit 1
+fi
 case $# in
     1)
         DOC="$1"
@@ -113,6 +124,10 @@ case $# in
         exit 1
         ;;
 esac
+if [ $? -ne 0 ]
+then
+    exit 1
+fi
 
 if [ "$MARKDOWN" = "" ]
 then
@@ -120,11 +135,16 @@ then
 fi
 
 TMP1=/tmp/showmd-$$.md
-TMP=/tmp/showmd-$$.html
+TMP=./showmd-$$.html
 # I remove ASCII formfeeds from the document before
 # processing, because reasons.
 sed 's===' "$DOC" >$TMP1
-$MARKDOWN $TMP1 >$TMP &&
+if [ "$MARKDOWN" = "XXXGITHUBSPECIALXXX" ]
+then
+    gh-md-to-html -c "" -i "" -n print $TMP1 >$TMP
+else
+    $MARKDOWN $TMP1 >$TMP
+fi &&
 if $JUST_FORMAT
 then
     if $CLIP
