@@ -26,7 +26,7 @@
 # optional pandoc dependencies you may need.
 
 MATHJAX='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-MML-AM_CHTML'
-PANDOC_MARKDOWN_BASE="pandoc --mathml --to html --ascii"
+PANDOC_MARKDOWN_BASE="pandoc --math-method=mathml --to html --ascii"
 PANDOC_MARKDOWN_STANDALONE="$PANDOC_MARKDOWN_BASE --standalone"
 PANDOC_MARKDOWN_FRAGMENT="$PANDOC_MARKDOWN_BASE"
 MARKDOWN=""
@@ -59,7 +59,7 @@ do
             shift
             ;;
         --mathml)
-            PANDOC_MARKDOWN_FRAGMENT="$PANDOC_MARKDOWN_FRAGMENT --mathml"
+            PANDOC_MARKDOWN_FRAGMENT="$PANDOC_MARKDOWN_FRAGMENT --math-method=mathml"
             shift
             ;;
         --pandoc)
